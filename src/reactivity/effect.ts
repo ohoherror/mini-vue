@@ -1,9 +1,10 @@
+import { extend } from '../shared'
 class ReactiveEffect {
-    private _fn: any;
+    private _fn: Function;
     public scheduler: Function | undefined;
     deps = []
-    private onStop
-    constructor(fn) {
+    private onStop: Function | undefined
+    constructor(fn: Function) {
         this._fn = fn;
         // this.scheduler = scheduler;
     }
@@ -19,13 +20,13 @@ class ReactiveEffect {
     }
 }
 
-function cleanupEffect(effect) {
+function cleanupEffect(effect: any) {
     effect.deps.forEach((dep: any) => {
         dep.delete(effect)
     });
 }
 const targetMap = new Map();
-export function track(target, key) {
+export function track(target: Object, key: String) {
     // target -> key -> dep
     let depsMap = targetMap.get(target);
     if (!depsMap) {
@@ -40,10 +41,13 @@ export function track(target, key) {
     }
 
     dep.add(activeEffect);
-    activeEffect.deps.push(dep)
+    if (activeEffect) {
+        activeEffect.deps.push(dep)
+    }
+
 }
 
-export function trigger(target, key) {
+export function trigger(target: Object, key: String) {
     let depsMap = targetMap.get(target);
     let dep = depsMap.get(key);
 
@@ -56,7 +60,7 @@ export function trigger(target, key) {
     }
 }
 
-export function stop(runner) {
+export function stop(runner: any) {
     runner.effect.stop()
 }
 
@@ -66,15 +70,14 @@ type effectOptions = {
 };
 
 let activeEffect;
-export function effect(fn, options: effectOptions = {}) {
+export function effect(fn: Function, options: effectOptions = {}) {
     // fn
     const _effect: any = new ReactiveEffect(fn);
-    Object.assign(_effect, options)
+    extend(_effect, options)
     _effect.run();
 
     const runner: any = _effect.run.bind(_effect);
     runner.effect = _effect
-
 
     return runner;
 }
