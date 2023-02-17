@@ -26,7 +26,7 @@ function cleanupEffect(effect: any) {
     });
 }
 const targetMap = new Map();
-export function track(target: Object, key: String) {
+export function track(target, key) {
     // target -> key -> dep
     let depsMap = targetMap.get(target);
     if (!depsMap) {
@@ -44,10 +44,8 @@ export function track(target: Object, key: String) {
     if (activeEffect) {
         activeEffect.deps.push(dep)
     }
-
 }
-
-export function trigger(target: Object, key: String) {
+export function trigger(target, key) {
     let depsMap = targetMap.get(target);
     let dep = depsMap.get(key);
 
