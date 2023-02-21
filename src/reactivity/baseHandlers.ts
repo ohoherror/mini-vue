@@ -25,7 +25,6 @@ function createGetter(isReadonly = false) {
 function createSetter() {
     return function set(target, key, value) {
         const res = Reflect.set(target, key, value);
-
         trigger(target, key);
         return res;
     };
