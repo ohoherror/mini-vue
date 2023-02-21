@@ -39,8 +39,9 @@ function cleanupEffect(effect: any) {
     });
 }
 const targetMap = new Map();
+//收集依赖
 export function track(target, key) {
-    if (!shouldTrack) return
+    if (!isTracking()) return
     // target -> key -> dep
     let depsMap = targetMap.get(target);
     if (!depsMap) {
@@ -53,15 +54,28 @@ export function track(target, key) {
         dep = new Set();
         depsMap.set(key, dep);
     }
+    trackEffects(dep)
 
+}
+
+export function trackEffects(dep) {
     dep.add(activeEffect);
     if (activeEffect) {
         activeEffect.deps.push(dep)
     }
 }
+
+export function isTracking() {
+    return shouldTrack && activeEffect
+}
+//触发依赖
 export function trigger(target, key) {
     let depsMap = targetMap.get(target);
     let dep = depsMap.get(key);
+    triggerEffects(dep)
+}
+
+export function triggerEffects(dep) {
     for (const effect of dep) {
         if (effect.scheduler) {
             effect.scheduler();
