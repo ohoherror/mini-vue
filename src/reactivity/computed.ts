@@ -15,7 +15,6 @@ class ComputedRefImpl {
         if (this.dirty) {
             this._value = this._effect.run()
             this.dirty = false
-
         }
         return this._value
     }
