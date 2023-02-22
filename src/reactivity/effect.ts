@@ -3,15 +3,15 @@ import { extend } from '../shared'
 let activeEffect;
 let shouldTrack = false
 
-class ReactiveEffect {
+export class ReactiveEffect {
     private _fn: Function;
     public scheduler: Function | undefined;
     deps = []
     active = true
     onStop?: () => void
-    constructor(fn: Function) {
+    constructor(fn: Function, scheduler?) {
         this._fn = fn;
-        // this.scheduler = scheduler;
+        this.scheduler = scheduler;
     }
     run() {
         if (!this.active) {
@@ -89,13 +89,13 @@ export function stop(runner: any) {
     runner.effect.stop()
 }
 
-type effectOptions = {
-    scheduler?: Function;
-    onStop?: any
-};
+// type effectOptions = {
+//     scheduler?: Function;
+//     onStop?: any
+// };
 
 
-export function effect(fn: Function, options: effectOptions = {}) {
+export function effect(fn: Function, options: any = {}) {
     // fn
     const _effect: any = new ReactiveEffect(fn);
     extend(_effect, options)
