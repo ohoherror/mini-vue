@@ -1,13 +1,17 @@
+import { ShapeFlags } from "../shared/ShapeFlag"
 import { createComponentInstance, setupComponent } from "./component"
+
 
 export function render(vnode, container) {
     patch(vnode, container)
 }
 
 export function patch(vnode, container) {
-    if (typeof vnode.type === 'string') {
+    const { shapeFlags } = vnode
+    //(0001|0101|1001)&0001 >0为true
+    if (shapeFlags & ShapeFlags.ELEMENT) {
         processElement(vnode, container)
-    } else {
+    } else if (shapeFlags & ShapeFlags.STATEFUL_COMPONENT) {
         processComponent(vnode, container)
     }
 }
@@ -33,15 +37,15 @@ function processElement(vnode: any, container: any) {
     mountElement(vnode, container)
 }
 function mountElement(vnode: any, container: any) {
-    const { type: domElType, props, children } = vnode
+    const { type: domElType, props, children, shapeFlags } = vnode
 
     const domEl = document.createElement(domElType)
     for (const prop in props) {
         domEl.setAttribute(prop, props[prop])
     }
-    if (typeof children === 'string') {
+    if (shapeFlags && ShapeFlags.TEXT_CHILDREN) {
         domEl.textContent = children
-    } else if (Array.isArray(children)) {
+    } else if (shapeFlags && ShapeFlags.ARRAY_CHILDREN) {
         mountChildren(vnode, domEl)
     }
     vnode.$el = domEl
