@@ -27,9 +27,15 @@ function handleSetupResult(instance: any, setupResult: any) {
 
 function finishComponentSetup(instance: any) {
     const component = instance.type
-    if (!instance.render) {
-        instance.render = component.render
-    }
+    instance.proxy = new Proxy({}, {
+        //key是render里面调用的key
+        get(target, key) {
+            if (key in instance.setupState) {
+                return instance.setupState[key]
+            }
+        }
+    })
+    instance.render = component.render
 }
 
 

@@ -10,7 +10,6 @@ export function patch(vnode, container) {
     } else {
         processComponent(vnode, container)
     }
-
 }
 
 export function processComponent(vnode, container) {
@@ -23,9 +22,9 @@ export function mountComponent(vnode, container) {
     setupRenderEffect(instance, container)
 }
 
-
 function setupRenderEffect(instance, container) {
-    const subTree = instance.render()
+    let proxy = instance.proxy
+    const subTree = instance.render.call(proxy)
     patch(subTree, container)
 }
 
