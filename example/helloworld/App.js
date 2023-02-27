@@ -5,7 +5,14 @@ export default {
     render() {
         window.self = this
         console.log(this)
-        return h('div', { id: "root", class: ['red', 'hard'] },
+        return h('div', {
+            onClick() {
+                console.log('click+32993')
+            },
+            onMousedown() {
+                console.log('mousedown')
+            },
+        },
             "hi," + this.title)
         // [h("p", { class: 'red' }, "hi"), h("p", { class: 'blue' }, 'mini-vue')])
     },

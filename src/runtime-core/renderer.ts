@@ -49,7 +49,14 @@ function mountElement(vnode: any, container: any) {
 
     const domEl = document.createElement(domElType)
     for (const prop in props) {
-        domEl.setAttribute(prop, props[prop])
+        let isEvent = (key) => /^on[A-Z]/.test(key)
+        if (isEvent(prop)) {
+            const event = prop.slice(2).toLowerCase()
+            domEl.addEventListener(event, props[prop])
+        } else {
+            domEl.setAttribute(prop, props[prop])
+        }
+
     }
     if (shapeFlags && ShapeFlags.TEXT_CHILDREN) {
         domEl.textContent = children
