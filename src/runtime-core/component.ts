@@ -1,15 +1,18 @@
+import { initProps } from "./componentProps"
 import { PublicInstanceProxyHandles } from "./componentPublicInstance"
 
 export function createComponentInstance(vnode) {
     const component = {
         vnode,
         type: vnode.type,
-        setupState: {}
+        setupState: {},
+        props: {}
     }
     return component
 }
 
 export function setupComponent(instance, container) {
+    initProps(instance, instance.vnode.props)
     setupStatefulComponent(instance)
 }
 

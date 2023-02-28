@@ -58,9 +58,9 @@ function mountElement(vnode: any, container: any) {
         }
 
     }
-    if (shapeFlags && ShapeFlags.TEXT_CHILDREN) {
+    if (shapeFlags & ShapeFlags.TEXT_CHILDREN) {
         domEl.textContent = children
-    } else if (shapeFlags && ShapeFlags.ARRAY_CHILDREN) {
+    } else if (shapeFlags & ShapeFlags.ARRAY_CHILDREN) {
         mountChildren(vnode, domEl)
     }
     vnode.$el = domEl
