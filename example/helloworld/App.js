@@ -6,7 +6,7 @@ export default {
     name: "APP",
     render() {
         window.self = this
-        console.log(this)
+        // console.log(this)
         // return h('div', {
         //     onClick() {
         //         console.log('click+32993')

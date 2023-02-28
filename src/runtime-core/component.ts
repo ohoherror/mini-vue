@@ -12,6 +12,7 @@ export function createComponentInstance(vnode) {
 }
 
 export function setupComponent(instance, container) {
+    //初始化props
     initProps(instance, instance.vnode.props)
     setupStatefulComponent(instance)
 }
@@ -20,10 +21,11 @@ function setupStatefulComponent(instance: any) {
     const component = instance.type
     const { setup } = component
     if (setup) {
-        const setupResult = setup()
+        const setupResult = setup(instance.props)
         handleSetupResult(instance, setupResult)
     }
 }
+
 function handleSetupResult(instance: any, setupResult: any) {
     if (typeof setupResult === 'object') {
         instance.setupState = setupResult
