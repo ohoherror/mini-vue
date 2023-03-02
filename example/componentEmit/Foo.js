@@ -5,6 +5,7 @@ export const Foo = {
     setup(props, { emit }) {
         const handleClick = () => {
             emit('add', 1)
+            emit('add-foo', 1)
         }
 
         return { handleClick }
