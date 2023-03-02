@@ -52,6 +52,7 @@ function mountElement(vnode: any, container: any) {
         let isEvent = (key) => /^on[A-Z]/.test(key)
         if (isEvent(prop)) {
             const event = prop.slice(2).toLowerCase()
+            console.log(domEl)
             domEl.addEventListener(event, props[prop])
         } else {
             domEl.setAttribute(prop, props[prop])
