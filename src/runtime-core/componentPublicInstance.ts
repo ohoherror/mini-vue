@@ -15,7 +15,7 @@ export const PublicInstanceProxyHandlers = {
         }
         const publicGetter = publicPropertiesMap[key]
         if (publicGetter) {
-            return publicGetter(instance.vnode)
+            return publicGetter(instance)
         }
     }
 }
