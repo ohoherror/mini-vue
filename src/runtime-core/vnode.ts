@@ -5,7 +5,7 @@ export function createVNode(type, props?, children?) {
         type,
         props,
         children,
-        $el: null,
+        el: null,
         shapeFlags: getShapeFlags(type),
     }
     if (typeof children === 'string') {
