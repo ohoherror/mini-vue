@@ -23,7 +23,7 @@ export function processComponent(vnode, container) {
 export function mountComponent(initialVNode, container) {
     const instance = createComponentInstance(initialVNode)
     //先处理setup里面的数据，把setup放在this里面去
-    setupComponent(instance, container)
+    setupComponent(instance)
     //处理render里面的数据，重新patch
     setupRenderEffect(instance, initialVNode, container)
 }
@@ -34,7 +34,7 @@ function setupRenderEffect(instance, initialVNode, container) {
     const subTree = instance.render.call(proxy)
     patch(subTree, container)
     //父级获取子集的dom树
-    initialVNode.$el = subTree.$el
+    initialVNode.el = subTree.el
 }
 
 function processElement(vnode: any, container: any) {
@@ -64,7 +64,7 @@ function mountElement(vnode: any, container: any) {
     } else if (shapeFlags & ShapeFlags.ARRAY_CHILDREN) {
         mountChildren(vnode, domEl)
     }
-    vnode.$el = domEl
+    vnode.el = domEl
     container.appendChild(domEl)
 }
 

@@ -5,7 +5,7 @@ const publicPropertiesMap = {
     $slots: (i) => i.slots,
 }
 
-export const PublicInstanceProxyHandles = {
+export const PublicInstanceProxyHandlers = {
     get({ _: instance }, key) {
         const { setupState, props } = instance
         if (hasOwn(setupState, key)) {
