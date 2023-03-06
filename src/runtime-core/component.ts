@@ -40,7 +40,6 @@ function setupStatefulComponent(instance: any) {
             emit: instance.emit,
         });
         setCurrentInstance(null);
-
         handleSetupResult(instance, setupResult);
     }
 }
@@ -51,15 +50,14 @@ function handleSetupResult(instance, setupResult: any) {
     if (typeof setupResult === "object") {
         instance.setupState = setupResult;
     }
-
     finishComponentSetup(instance);
 }
 
 function finishComponentSetup(instance: any) {
     const Component = instance.type;
-
     instance.render = Component.render;
 }
+
 let currentInstance = null
 
 export function getCurrentInstance() {
