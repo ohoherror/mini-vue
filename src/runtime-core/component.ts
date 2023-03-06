@@ -12,6 +12,8 @@ export function createComponentInstance(vnode) {
         props: {},
         slots: {},
         emit: () => { },
+        providers: {},
+        parent
     };
 
     component.emit = emit.bind(null, component) as any;
