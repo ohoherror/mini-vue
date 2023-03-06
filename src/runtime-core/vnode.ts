@@ -1,5 +1,8 @@
 import { ShapeFlags } from "../shared/ShapeFlag"
 
+export const Fragment = Symbol('Fragment')
+export const TextNode = Symbol('TextNode')
+
 export function createVNode(type, props?, children?) {
     const vnode = {
         type,
@@ -8,6 +11,7 @@ export function createVNode(type, props?, children?) {
         el: null,
         shapeFlags: getShapeFlags(type),
     }
+
     if (typeof children === 'string') {
         //要添加或逻辑，因为要走ShapeFlags.ELEMENT的逻辑，继续绘制dom
         vnode.shapeFlags |= ShapeFlags.TEXT_CHILDREN //0001|0100->0101
@@ -22,6 +26,10 @@ export function createVNode(type, props?, children?) {
     }
 
     return vnode
+}
+
+export function createTextVNode(text) {
+    return createVNode(TextNode, {}, text)
 }
 
 function getShapeFlags(type) {

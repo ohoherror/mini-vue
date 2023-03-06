@@ -1,5 +1,6 @@
 import { ShapeFlags } from "../shared/ShapeFlag"
 import { createComponentInstance, setupComponent } from "./component"
+import { Fragment, TextNode } from "./vnode"
 
 
 export function render(vnode, container) {
@@ -7,13 +8,25 @@ export function render(vnode, container) {
 }
 
 export function patch(vnode, container) {
-    const { shapeFlags } = vnode
-    //(0001|0101|1001)&0001 >0为true
-    if (shapeFlags & ShapeFlags.ELEMENT) {
-        processElement(vnode, container)
-    } else if (shapeFlags & ShapeFlags.STATEFUL_COMPONENT) {
-        processComponent(vnode, container)
+    const { type, shapeFlags } = vnode
+    switch (type) {
+        case Fragment:
+            processFragment(vnode, container)
+            break
+        case TextNode:
+            processTextNode(vnode, container)
+            break
+        default:
+            //(0001|0101|1001)&0001 >0为true
+            if (shapeFlags & ShapeFlags.ELEMENT) {
+                processElement(vnode, container)
+            } else if (shapeFlags & ShapeFlags.STATEFUL_COMPONENT) {
+                processComponent(vnode, container)
+            }
+            break
     }
+
+
 }
 
 export function processComponent(vnode, container) {
@@ -40,6 +53,17 @@ function setupRenderEffect(instance, initialVNode, container) {
 function processElement(vnode: any, container: any) {
     mountElement(vnode, container)
 }
+
+function processFragment(vnode: any, container: any) {
+    mountChildren(vnode, container)
+}
+
+
+function processTextNode(vnode: any, container: any) {
+    const element = (vnode.el = document.createTextNode(vnode.children))
+    container.appendChild(element)
+}
+
 function mountElement(vnode: any, container: any) {
     //type里面放标签名，如：div,button等
     //props里面放样式、事件等
@@ -73,4 +97,5 @@ function mountChildren(vnode: any, container: any) {
         patch(vnode, container)
     })
 }
+
 
