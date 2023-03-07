@@ -3,6 +3,7 @@ import { ShapeFlags } from "../shared/ShapeFlag"
 import { createComponentInstance, setupComponent } from "./component"
 import { createAppAPI } from "./createApp"
 import { Fragment, TextNode } from "./vnode"
+import { effect } from "../reactivity/effect";
 
 export function createRenderer(options) {
     const { createElement, patchProp, insert } = options
@@ -44,11 +45,16 @@ export function createRenderer(options) {
 
     function setupRenderEffect(instance, initialVNode, container) {
         //this指向setup里面的对象
-        let proxy = instance.proxy
-        const subTree = instance.render.call(proxy)
-        patch(subTree, container, instance)
-        //父级获取子集的dom树
-        initialVNode.el = subTree.el
+        effect(() => {
+            const { proxy } = instance;
+            const subTree = (instance.subTree = instance.render.call(proxy));
+            console.log(subTree)
+            patch(subTree, container, instance);
+
+            initialVNode.el = subTree.el;
+
+        })
+
     }
 
     function processElement(vnode: any, container: any, parentComponent) {
@@ -58,7 +64,6 @@ export function createRenderer(options) {
     function processFragment(vnode: any, container: any, parentComponent) {
         mountChildren(vnode, container, parentComponent)
     }
-
 
     function processTextNode(vnode: any, container: any, parentComponent) {
         const element = (vnode.el = document.createTextNode(vnode.children))
