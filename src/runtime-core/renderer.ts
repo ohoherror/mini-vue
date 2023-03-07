@@ -71,7 +71,7 @@ export function createRenderer(options) {
         //children里面放内容
         //此时的shapeFlags只有字符串类型或数组类型
         const { type: domElType, props, children, shapeFlags } = vnode
-        const domEl = vnode.el = createElement(domElType)
+        const domEl = (vnode.el = createElement(domElType))
         for (const prop in props) {
             patchProp(domEl, prop, props)
         }
