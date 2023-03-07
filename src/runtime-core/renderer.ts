@@ -32,8 +32,7 @@ export function processComponent(vnode, container, parentComponent) {
 }
 
 export function mountComponent(initialVNode, container, parentComponent) {
-    const instance = createComponentInstance(initialVNode)
-    instance.parent = parentComponent
+    const instance = createComponentInstance(initialVNode, parentComponent)
     //先处理setup里面的数据，把setup放在this里面去
     setupComponent(instance)
     //处理render里面的数据，重新patch
