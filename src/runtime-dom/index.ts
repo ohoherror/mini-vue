@@ -15,7 +15,6 @@ function patchProp(el, key, prevVal, nextVal) {
         } else {
             el.setAttribute(key, nextVal);
         }
-
     }
 }
 
@@ -23,10 +22,24 @@ function insert(el, parent) {
     parent.append(el);
 }
 
+function remove(child) {
+    const parentElement = child.parentNode
+    if (parentElement) {
+        // 父节点存在，就从父节点中删除这个子节点
+        parentElement.remove(child)
+    }
+}
+
+function setElementText(el, text) {
+    el.textContent = text;
+}
+
 const renderer: any = createRenderer({
     createElement,
     patchProp,
     insert,
+    remove,
+    setElementText
 });
 
 export function createApp(...args) {
