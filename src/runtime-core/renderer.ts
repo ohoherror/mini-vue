@@ -103,8 +103,41 @@ export function createRenderer(options) {
             if (prevShapeFlag & ShapeFlags.TEXT_CHILDREN) {
                 hostSetElementText(n1.el, '')
                 mountChildren(c2, container, parentComponent)
+            } else {
+                patchKeyedChildren(c1, c2, container, parentComponent)
             }
         }
+    }
+
+    function isSameVNode(n1, n2) {
+        return n1.type === n2.type && n1.key === n2.key
+    }
+
+    function patchKeyedChildren(c1, c2, container, parentComponent) {
+        let i = 0
+        let e1 = c1.length - 1
+        let e2 = c2.length - 1
+        while (i <= e1 && i <= e2) {
+            if (isSameVNode(c1[i], c2[i])) {
+                patch(c1[i], c2[i], container, parentComponent)
+            } else {
+                break
+            }
+            i++
+        }
+
+        while (i <= e1 && i <= e2) {
+            if (isSameVNode(c1[e1], c2[e2])) {
+                patch(c1[e1], c2[e2], container, parentComponent)
+            } else {
+                break
+            }
+            e1--
+            e2--
+        }
+        console.log('i=' + i, 'e1=' + e1, 'e2=' + e2)
+
+
     }
 
     function unmountChildren(children) {
