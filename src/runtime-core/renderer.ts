@@ -1,9 +1,10 @@
 
-import { ShapeFlags } from "../shared/ShapeFlag"
-import { createComponentInstance, setupComponent } from "./component"
-import { createAppAPI } from "./createApp"
-import { Fragment, Text } from "./vnode"
 import { effect } from "../reactivity/effect";
+import { EMPTY_OBJ, hasOwn } from "../shared";
+import { ShapeFlags } from "../shared/ShapeFlag";
+import { createComponentInstance, setupComponent } from "./component";
+import { createAppAPI } from "./createApp";
+import { Fragment, Text } from "./vnode";
 
 export function createRenderer(options) {
     const {
@@ -13,39 +14,72 @@ export function createRenderer(options) {
     } = options;
 
     function render(vnode, container) {
-        patch(vnode, container, null)
+        patch(null, vnode, container, null)
     }
 
-    function patch(vnode, container, parentComponent) {
-        const { type, shapeFlag } = vnode
+    function patch(n1, n2, container, parentComponent) {
+        const { type, shapeFlag } = n2
         switch (type) {
             case Fragment:
-                processFragment(vnode, container, parentComponent)
+                processFragment(n1, n2, container, parentComponent)
                 break
             case Text:
-                processText(vnode, container, parentComponent)
+                processText(n1, n2, container, parentComponent)
                 break
             default:
                 //(0001|0101|1001)&0001 >0为true
                 if (shapeFlag & ShapeFlags.ELEMENT) {
-                    processElement(vnode, container, parentComponent)
+                    processElement(n1, n2, container, parentComponent)
                 } else if (shapeFlag & ShapeFlags.STATEFUL_COMPONENT) {
-                    processComponent(vnode, container, parentComponent)
+                    processComponent(n1, n2, container, parentComponent)
                 }
                 break
         }
     }
-    function processText(vnode: any, container: any, parentComponent) {
-        const element = (vnode.el = document.createTextNode(vnode.children))
+    function processText(n1, n2, container: any, parentComponent) {
+        const element = (n2.el = document.createTextNode(n2.children))
         container.appendChild(element)
     }
 
-    function processFragment(vnode: any, container: any, parentComponent) {
-        mountChildren(vnode, container, parentComponent)
+    function processFragment(n1, n2, container: any, parentComponent) {
+        mountChildren(n2, container, parentComponent)
     }
 
-    function processElement(vnode: any, container: any, parentComponent) {
-        mountElement(vnode, container, parentComponent)
+    function processElement(n1, n2, container: any, parentComponent) {
+        if (!n1) {
+            mountElement(n2, container, parentComponent)
+        } else {
+            patchElement(n1, n2, container)
+        }
+    }
+
+    function patchElement(n1, n2, container) {
+        console.log("patchElement")
+        console.log('n1', n1)
+        console.log('n2', n2)
+        const el = (n2.el = n1.el)
+        const oldProps = n1.props || EMPTY_OBJ
+        const newProps = n2.props || EMPTY_OBJ
+        patchProps(el, oldProps, newProps)
+    }
+
+    function patchProps(el, oldProps: any, newProps: any) {
+        if (oldProps !== newProps) {
+            for (let key in newProps) {
+                let prevProp = oldProps[key]
+                let newProp = newProps[key]
+                if (prevProp !== newProp) {
+                    hostPatchProp(el, key, prevProp, newProp)
+                }
+            }
+            if (oldProps !== EMPTY_OBJ) {
+                for (let key in oldProps) {
+                    if (!hasOwn(newProps, key)) {
+                        hostPatchProp(el, key, oldProps[key], null)
+                    }
+                }
+            }
+        }
     }
 
     function mountElement(vnode: any, container: any, parentComponent) {
@@ -62,21 +96,20 @@ export function createRenderer(options) {
         }
         const { props } = vnode;
         for (const prop in props) {
-            hostPatchProp(el, prop, props)
+            hostPatchProp(el, prop, null, props[prop])
         }
 
         hostInsert(el, container)
     }
 
-
-    function mountChildren(vnode: any, container: any, parentComponent) {
+    function mountChildren(vnode, container, parentComponent) {
         vnode.children.forEach((v) => {
-            patch(v, container, parentComponent);
+            patch(null, v, container, parentComponent);
         });
     }
 
-    function processComponent(vnode, container, parentComponent) {
-        mountComponent(vnode, container, parentComponent)
+    function processComponent(n1, n2, container, parentComponent) {
+        mountComponent(n2, container, parentComponent)
     }
 
     function mountComponent(initialVNode, container, parentComponent) {
@@ -87,25 +120,33 @@ export function createRenderer(options) {
         setupRenderEffect(instance, initialVNode, container)
     }
 
-    function setupRenderEffect(instance, initialVNode, container) {
-        //this指向setup里面的对象
+    function setupRenderEffect(instance: any, initialVNode, container) {
         effect(() => {
-            console.log("init");
-            const { proxy } = instance;
-            const subTree = (instance.subTree = instance.render.call(proxy));
+            if (!instance.isMounted) {
+                console.log("init");
+                const { proxy } = instance;
+                const subTree = (instance.subTree = instance.render.call(proxy));
 
-            patch(subTree, container, instance);
+                patch(null, subTree, container, instance);
 
-            initialVNode.el = subTree.el;
+                initialVNode.el = subTree.el;
 
-            instance.isMounted = true;
+                instance.isMounted = true;
+            } else {
+                console.log("update");
+                const { proxy } = instance;
+                const subTree = instance.render.call(proxy);
+                const prevSubTree = instance.subTree;
+                instance.subTree = subTree;
 
-        })
-
+                patch(prevSubTree, subTree, container, instance);
+            }
+        });
     }
-
     return {
         createApp: createAppAPI(render)
     }
 
 }
+
+
