@@ -1,4 +1,4 @@
-import { createRenderer } from "../runtime-core/index";
+import { createRenderer } from "../runtime-core";
 
 function createElement(type) {
     return document.createElement(type);
@@ -18,17 +18,14 @@ function patchProp(el, key, prevVal, nextVal) {
     }
 }
 
-
-
 function insert(child, parent, anchor) {
     parent.insertBefore(child, anchor || null);
 }
 
 function remove(child) {
-    const parentElement = child.parentNode
-    if (parentElement) {
-        // 父节点存在，就从父节点中删除这个子节点
-        parentElement.remove(child)
+    const parent = child.parentNode;
+    if (parent) {
+        parent.removeChild(child);
     }
 }
 
@@ -41,11 +38,11 @@ const renderer: any = createRenderer({
     patchProp,
     insert,
     remove,
-    setElementText
+    setElementText,
 });
 
 export function createApp(...args) {
     return renderer.createApp(...args);
 }
 
-export * from "../runtime-core/index";
+export * from "../runtime-core";
