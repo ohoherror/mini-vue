@@ -1,5 +1,5 @@
 import { effect } from "../reactivity/effect";
-import { EMPTY_OBJ } from "../shared";
+import { EMPTY_OBJ, getSequence } from "../shared";
 import { ShapeFlags } from "../shared/ShapeFlag";
 import { createComponentInstance, setupComponent } from "./component";
 import { createAppAPI } from "./createApp";
@@ -168,7 +168,9 @@ export function createRenderer(options) {
             // 中间对比
             let s1 = i;
             let s2 = i;
-
+            let shouldMove = false
+            // 目前最大的索引
+            let maxNewIndexSoFar = 0
             const toBePatched = e2 - s2 + 1;
             let patched = 0;
             const keyToNewIndexMap = new Map();
@@ -177,7 +179,9 @@ export function createRenderer(options) {
                 const nextChild = c2[i];
                 keyToNewIndexMap.set(nextChild.key, i);
             }
-
+            const newIndexToOldIndexMap = new Array(toBePatched)
+            // 循环初始化每一项索引，0 表示未建立映射关系
+            for (let i = 0; i < toBePatched; i++) newIndexToOldIndexMap[i] = 0
             for (let i = s1; i <= e1; i++) {
                 const prevChild = c1[i];
 
@@ -202,9 +206,47 @@ export function createRenderer(options) {
                 if (newIndex === undefined) {
                     hostRemove(prevChild.el);
                 } else {
+                    if (newIndex >= maxNewIndexSoFar) {
+                        // 就把当前的索引给到最大的索引
+                        maxNewIndexSoFar = newIndex
+                    } else {
+                        // 否则就不是一直递增，那么就是需要移动的
+                        shouldMove = true
+                    }
+                    //newIndexToOldIndexMap=[5,3,4]
+                    newIndexToOldIndexMap[newIndex - s2] = i + 1
                     patch(prevChild, c2[newIndex], container, parentComponent, null);
                     patched++;
                 }
+            }
+            const increasingNewIndexSequence = shouldMove ? getSequence(newIndexToOldIndexMap) : []
+            console.log(increasingNewIndexSequence)
+            // 需要两个指针 i,j
+            // j 指向获取出来的最长递增子序列的索引
+            // i 指向我们新节点
+
+            let j = increasingNewIndexSequence.length - 1
+            for (let i = toBePatched - 1; i >= 0; i--) {
+                const nextIndex = i + s2
+                // 获取到需要插入的元素
+                const nextChild = c2[nextIndex]
+                // 获取锚点
+                const anchor = nextIndex + 1 < l2 ? c2[nextIndex + 1].el : null
+                if (newIndexToOldIndexMap[i] === 0) {
+                    // 创建
+                    patch(null, nextChild, container, parentComponent, anchor)
+                } else if (shouldMove) {
+                    if (j <= 0 || i !== increasingNewIndexSequence[j]) {
+                        // 移动
+                        console.log('移动位置', c2[i + s2])
+                        hostInsert(nextChild.el, container, anchor)
+                    } else {
+                        // 不移动
+                        console.log('不移动', c2[i + s2])
+                        j--
+                    }
+                }
+
             }
         }
     }
