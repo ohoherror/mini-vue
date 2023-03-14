@@ -22,9 +22,6 @@ export default {
             nextTick(() => {
                 console.log(instance);
             });
-
-            // await nextTick()
-            // console.log(instance)
         }
 
         return {
