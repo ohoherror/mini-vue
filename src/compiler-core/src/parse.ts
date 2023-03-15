@@ -12,7 +12,6 @@ export function baseParse(content: string) {
 
 function parseChildren(context, ancestors) {
     const nodes: any = [];
-
     while (!isEnd(context, ancestors)) {
         let node;
         const s = context.source;
